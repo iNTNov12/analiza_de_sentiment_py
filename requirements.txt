@@ -15,3 +15,6 @@ ro-punctuator==0.1.0
 ro-punctuation==0.1.0
 ro-punctuation-restore==0.1.0
 ro-punctuation-restorer==0.1.0
+setuptools>=42
+wheel
+build
