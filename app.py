@@ -259,19 +259,22 @@ def get_tweets(keyword, count=100, start_date=None, end_date=None):
             if any(phrase in clean_lower for phrase in strong_negative_phrases):
                 sentiment = 'very_negative'
             
-            tweets.append({
-                'id': tweet.id,
-                'text': tweet.text,
+            # Ensure all fields are properly initialized with defaults if None
+            tweet_data = {
+                'id': str(tweet.id) if tweet.id else '',
+                'text': tweet.text if tweet.text else '',
                 'clean_text': clean_text,
-                'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'username': user.username,
-                'user_name': user.name,
-                'retweets': tweet.public_metrics.get('retweet_count', 0),
-                'likes': tweet.public_metrics.get('like_count', 0),
-                'replies': tweet.public_metrics.get('reply_count', 0),
-                'sentiment': sentiment,
-                'sentiment_score': sentiment_score
-            })
+                'created_at': tweet.created_at.isoformat() if tweet.created_at else datetime.now().isoformat(),
+                'username': user.username if user and user.username else '',
+                'user_screen_name': user.name if user and user.name else '',
+                'user_profile_image': user.profile_image_url.replace('_normal', '') if user and user.profile_image_url else '',
+                'retweet_count': int(tweet.public_metrics.get('retweet_count', 0)) if tweet.public_metrics else 0,
+                'like_count': int(tweet.public_metrics.get('like_count', 0)) if tweet.public_metrics else 0,
+                'reply_count': int(tweet.public_metrics.get('reply_count', 0)) if tweet.public_metrics else 0,
+                'sentiment_score': float(sentiment_score) if sentiment_score is not None else 0.0,
+                'sentiment': str(sentiment) if sentiment else 'neutral'
+            }
+            tweets.append(tweet_data)
             
             if len(tweets) >= count:
                 break
@@ -308,11 +311,15 @@ def analyze_sentiment():
                 # Create a proper time series with date as index
                 time_series = df.set_index('created_at')['sentiment_score'].resample('D').mean()
                 
-                # Convert to list of dictionaries with date and score
-                time_series_data = [{
-                    'date': date.strftime('%Y-%m-%d'),
-                    'score': float(score)  # Ensure score is serializable
-                } for date, score in time_series.items()]
+                # Convert to list of dictionaries with date and score, handling NaN values
+                time_series_data = []
+                for date, score in time_series.items():
+                    # Convert numpy.nan to None for JSON serialization
+                    score_value = float(score) if pd.notna(score) else None
+                    time_series_data.append({
+                        'date': date.strftime('%Y-%m-%d'),
+                        'score': score_value
+                    })
             except Exception as e:
                 print(f"Error processing time series: {str(e)}")
                 time_series_data = []
@@ -325,14 +332,14 @@ def analyze_sentiment():
                               'neutral', 'slightly_negative', 'negative', 'very_negative']
         
         # Ensure all categories are present in the distribution
-        sentiment_counts = df['sentiment'].value_counts()
+        sentiment_counts = df['sentiment'].value_counts(dropna=True)  # Drop NaN values
         sentiment_dist = []
         
         for category in sentiment_categories:
-            count = sentiment_counts.get(category, 0)
+            count = int(sentiment_counts.get(category, 0))  # Convert to int immediately
             sentiment_dist.append({
                 'sentiment': category,
-                'count': int(count)  # Convert numpy.int64 to Python int for JSON serialization
+                'count': count
             })
         
         # Generate word cloud from clean text
@@ -351,20 +358,20 @@ def analyze_sentiment():
         else:
             img_str = None
         
-        # Prepare response
+        # Prepare response with all fields initialized
         response_data = {
-            'time_series': time_series_data,
-            'sentiment_distribution': sentiment_dist,
-            'wordcloud': img_str,
-            'tweets': tweets[:10],  # Return first 10 tweets
-            'total_tweets': len(tweets),
-            'very_positive_count': len([t for t in tweets if t['sentiment'] == 'very_positive']),
-            'positive_count': len([t for t in tweets if t['sentiment'] == 'positive']),
-            'slightly_positive_count': len([t for t in tweets if t['sentiment'] == 'slightly_positive']),
-            'neutral_count': len([t for t in tweets if t['sentiment'] == 'neutral']),
-            'slightly_negative_count': len([t for t in tweets if t['sentiment'] == 'slightly_negative']),
-            'negative_count': len([t for t in tweets if t['sentiment'] == 'negative']),
-            'very_negative_count': len([t for t in tweets if t['sentiment'] == 'very_negative'])
+            'time_series': time_series_data or [],
+            'sentiment_distribution': sentiment_dist or [],
+            'wordcloud': img_str or '',
+            'tweets': tweets[:10] if tweets else [],  # Return first 10 tweets
+            'total_tweets': int(len(tweets)) if tweets else 0,
+            'very_positive_count': int(len([t for t in tweets if t.get('sentiment') == 'very_positive'])),
+            'positive_count': int(len([t for t in tweets if t.get('sentiment') == 'positive'])),
+            'slightly_positive_count': int(len([t for t in tweets if t.get('sentiment') == 'slightly_positive'])),
+            'neutral_count': int(len([t for t in tweets if t.get('sentiment') == 'neutral'])),
+            'slightly_negative_count': int(len([t for t in tweets if t.get('sentiment') == 'slightly_negative'])),
+            'negative_count': int(len([t for t in tweets if t.get('sentiment') == 'negative'])),
+            'very_negative_count': int(len([t for t in tweets if t.get('sentiment') == 'very_negative']))
         }
         
         return jsonify(response_data)
