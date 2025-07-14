@@ -2,14 +2,17 @@ services:
   - type: web
     name: analiza-sentiment
     env: python
+    python:
+      version: 3.9.16
     buildCommand: |-
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      python -m nltk.downloader vader_lexicon stopwords
+      chmod +x build.sh
+      ./build.sh
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
       - key: FLASK_ENV
         value: production
+      - key: PYTHONUNBUFFERED
+        value: true
     plan: free
