@@ -14,6 +14,7 @@ import io
 import base64
 from dotenv import load_dotenv
 import re
+import wordninja
 
 # Load environment variables
 load_dotenv()
