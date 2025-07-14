@@ -389,7 +389,6 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
     # Create necessary directories if they don't exist
     os.makedirs('static', exist_ok=True)
     os.makedirs('templates', exist_ok=True)
