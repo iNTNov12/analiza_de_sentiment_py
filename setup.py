@@ -1,0 +1,23 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="analiza-sentiment",
+    version="0.1.0",
+    packages=find_packages(),
+    install_requires=[
+        'flask==2.3.3',
+        'flask-cors==4.0.0',
+        'pandas==2.0.3',
+        'numpy==1.24.4',
+        'scikit-learn==1.3.0',
+        'nltk==3.8.1',
+        'tweepy==4.14.0',
+        'python-dotenv==1.0.0',
+        'plotly==5.15.0',
+        'dash==2.11.1',
+        'dash-bootstrap-components==1.4.1',
+        'wordcloud==1.9.2',
+        'gunicorn==20.1.0'
+    ],
+    python_requires='>=3.9',
+)
