@@ -1,3 +1,6 @@
+setuptools>=42
+wheel
+build
 flask==2.3.3
 flask-cors==4.0.0
 pandas==2.0.3
@@ -15,6 +18,3 @@ ro-punctuator==0.1.0
 ro-punctuation==0.1.0
 ro-punctuation-restore==0.1.0
 ro-punctuation-restorer==0.1.0
-setuptools>=42
-wheel
-build
