@@ -22,8 +22,3 @@ ro-wordninja==0.1.0
 ro-punctuator==0.1.0
 ro-punctuation==0.1.0
 ro-punctuation-restore==0.1.0
-
-# Build dependencies
-setuptools==68.0.0
-wheel==0.41.2
-build==0.10.0
