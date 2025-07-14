@@ -3,14 +3,14 @@ services:
     name: analiza-sentiment
     env: python
     python:
-      version: 3.9.16
+      version: 3.9.13
     buildCommand: |-
       chmod +x build.sh
       ./build.sh
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.16
+        value: 3.9.13
       - key: FLASK_ENV
         value: production
       - key: PYTHONUNBUFFERED
