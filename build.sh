@@ -1,7 +1,12 @@
 #!/bin/bash
+# Exit on error
+set -e
+
 # Install Python dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+echo "Installing Python dependencies..."
+python -m pip install --upgrade pip
+pip install --no-cache-dir -r requirements.txt
 
 # Download NLTK data
-python -m nltk.downloader vader_lexicon stopwords
+echo "Downloading NLTK data..."
+python -c "import nltk; nltk.download('vader_lexicon'); nltk.download('stopwords')"
